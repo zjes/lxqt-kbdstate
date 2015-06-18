@@ -9,11 +9,16 @@
 KbdState::KbdState(const ILxQtPanelPluginStartupInfo &startupInfo):
     QObject(),
     ILxQtPanelPlugin(startupInfo),
-    m_content(&m_watcher)
+    m_content(m_watcher.isLayoutEnabled())
 {
     Settings::instance().init(settings());
+
     connect(&m_content, &Content::controlClicked, &m_watcher, &KbdWatcher::controlClicked);
+    connect(&m_watcher, &KbdWatcher::layoutChanged, &m_content, &Content::layoutChanged);
+    connect(&m_watcher, &KbdWatcher::modifierStateChanged, &m_content, &Content::modifierStateChanged);
+
     settingsChanged();
+
     const LxQt::LxQtTheme & theme = LxQt::LxQtTheme::currentTheme();
     QFile qss(theme.path()+"/lxqt-kbdstate.qss");
     if(qss.exists()){

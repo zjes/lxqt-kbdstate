@@ -5,9 +5,9 @@
 #include "kbdstate.h"
 #include "content.h"
 
-Content::Content(KbdWatcher *watcher) :
+Content::Content(bool layoutEnabled):
     QWidget(),
-    m_watcher(watcher)
+    m_layoutEnabled(layoutEnabled)
 {
     QHBoxLayout *box = new QHBoxLayout;
     box->setContentsMargins(0, 0, 0, 0);
@@ -37,16 +37,6 @@ Content::Content(KbdWatcher *watcher) :
     m_layout->setAlignment(Qt::AlignCenter);
     m_layout->installEventFilter(this);
     layout()->addWidget(m_layout);
-
-
-    connect(m_watcher, &KbdWatcher::modifierStateChanged, [this](Controls mod, bool active){
-        setEnabled(mod, active);
-    });
-
-    connect(m_watcher, &KbdWatcher::layoutChanged, [this](const QString & sym, const QString & name){
-        m_layout->setText(sym.toUpper());
-        m_layout->setToolTip(name);
-    });
 }
 
 Content::~Content()
@@ -57,9 +47,21 @@ bool Content::setup()
     m_capsLock->setVisible(Settings::instance().showCapLock());
     m_numLock->setVisible(Settings::instance().showNumLock());
     m_scrollLock->setVisible(Settings::instance().showScrollLock());
-    m_layout->setVisible(m_watcher->isLayoutEnabled() && Settings::instance().showLayout());
+    m_layout->setVisible(m_layoutEnabled && Settings::instance().showLayout());
     return true;
 }
+
+void Content::layoutChanged(const QString & sym, const QString & name)
+{
+    m_layout->setText(sym.toUpper());
+    m_layout->setToolTip(name);
+}
+
+void Content::modifierStateChanged(Controls mod, bool active)
+{
+    setEnabled(mod, active);
+}
+
 
 void Content::setEnabled(Controls cnt, bool enabled)
 {

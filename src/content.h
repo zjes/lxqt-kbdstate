@@ -5,13 +5,12 @@
 #include "controls.h"
 
 class QLabel;
-class KbdWatcher;
 
 class Content : public QWidget
 {
     Q_OBJECT
 public:
-    Content(KbdWatcher *watcher);
+    Content(bool layoutEnabled);
     ~Content();
 
 public:
@@ -20,10 +19,13 @@ public:
     bool setup();
 
     virtual bool eventFilter(QObject *object, QEvent *event);
+public slots:
+    void layoutChanged(const QString & sym, const QString & name);
+    void modifierStateChanged(Controls mod, bool active);
 signals:
     void controlClicked(Controls cnt);
 private:
-    KbdWatcher *m_watcher;
+    bool        m_layoutEnabled;
     QLabel     *m_capsLock;
     QLabel     *m_numLock;
     QLabel     *m_scrollLock;

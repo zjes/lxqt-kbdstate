@@ -30,8 +30,6 @@ else()
     add_definitions(-DX11_ENABLED)
 endif()
 
-message(${LXQT_LIBRARIES})
-
 add_plugin(${PROJECT_NAME}
     SOURCES
         kbdstate-plugin.cpp
