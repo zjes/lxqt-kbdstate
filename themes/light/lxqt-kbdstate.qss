@@ -1,0 +1,21 @@
+#KbdState {
+    margin: 0px;
+    border: 0px;
+    padding: 0px;
+}
+
+#KbdState > QLabel {
+    color: gray;
+    border: 0px;
+    margin: 2px 0;
+    padding: 0px 3px;
+    border-radius: 3px;
+    border: none;
+}
+
+#KbdState > QLabel:enabled {
+    background: palette(highlight);
+    color: palette(highlighted-text);
+    margin: 0;
+    padding: 2px 3px;
+}

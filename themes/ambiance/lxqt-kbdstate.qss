@@ -1,0 +1,16 @@
+#KbdState > QLabel {
+    padding: 3px;
+    border: 0px;
+}
+
+#KbdState QLabel:enabled {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #f88657, stop:1 #eb7140);
+    color: #f2f1f0;
+    border: 1px solid #ca5f34;
+    border-radius: 4px;
+}
+
+#KbdState:disabled {
+    background: transparent;
+    color: #f2f1f0;
+}

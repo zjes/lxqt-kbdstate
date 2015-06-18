@@ -1,0 +1,11 @@
+#KbdState > QLabel {
+    padding: 3px;
+    border: 0px;
+}
+#KbdState QLabel:disabled {
+    color: #999999;
+}
+
+#KbdState QLabel:enabled {
+    background: #1A80B6;
+}

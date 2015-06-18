@@ -30,6 +30,8 @@ else()
     add_definitions(-DX11_ENABLED)
 endif()
 
+message(${LXQT_LIBRARIES})
+
 add_plugin(${PROJECT_NAME}
     SOURCES
         kbdstate-plugin.cpp
@@ -48,11 +50,11 @@ add_plugin(${PROJECT_NAME}
         src/controls.h
         src/kbdstateconfig.h
         src/kbdstateconfig.cpp
-
         ${ADDSRC}
     UI  src/kbdstateconfig.ui
     LIBS
         ${ADDLIBS}
+        ${LXQT_LIBRARIES}
         Qt5::Widgets
         KF5::GuiAddons
         KF5::WindowSystem
