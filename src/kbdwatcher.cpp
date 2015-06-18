@@ -35,11 +35,14 @@ void KbdWatcher::createKeeper(KeeperType type)
         break;
     }
 
-    connect(m_keeper.data(), &KbdKeeper::changed, [this](){
-        emit layoutChanged(m_keeper->sym(), m_keeper->name());
-    });
+    connect(m_keeper.data(), SIGNAL(changed()), this, SLOT(keeperChanged()));
 
     m_keeper->setup();
+}
+
+void KbdWatcher::keeperChanged()
+{
+    emit layoutChanged(m_keeper->sym(), m_keeper->name());
 }
 
 void KbdWatcher::modifierLocked(Qt::Key key, bool active)

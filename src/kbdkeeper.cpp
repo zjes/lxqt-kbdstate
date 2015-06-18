@@ -18,21 +18,27 @@ KbdKeeper::~KbdKeeper()
 
 bool KbdKeeper::setup()
 {
-    connect(&m_layout, &KbdLayout::keyboardChanged, [this](){
-        m_layout.readKbdInfo(m_info);
-        emit changed();
-    });
-
-    connect(&m_layout, &KbdLayout::layoutChanged, [this](int layId){
-        m_info.setCurrentGroup(layId);
-        emit changed();
-    });
-
-    connect(&m_layout, &KbdLayout::checkState, [this](){
-    });
+    connect(&m_layout, SIGNAL(keyboardChanged()), SLOT(keyboardChanged()));
+    connect(&m_layout, SIGNAL(layoutChanged(uint)), SLOT(layoutChanged(uint)));
+    connect(&m_layout, SIGNAL(checkState()), SLOT(checkState()));
 
     return true;
 }
+
+void KbdKeeper::keyboardChanged()
+{
+    m_layout.readKbdInfo(m_info);
+    emit changed();
+}
+
+void KbdKeeper::layoutChanged(uint group)
+{
+    m_info.setCurrentGroup(group);
+    emit changed();
+}
+
+void KbdKeeper::checkState()
+{}
 
 void KbdKeeper::switchToNext()
 {
@@ -60,43 +66,33 @@ WinKbdKeeper::WinKbdKeeper(const KbdLayout & layout):
 WinKbdKeeper::~WinKbdKeeper()
 {}
 
-bool WinKbdKeeper::setup()
+void WinKbdKeeper::layoutChanged(uint group)
 {
-    connect(&m_layout, &KbdLayout::keyboardChanged, [this](){
-        m_layout.readKbdInfo(m_info);
-        emit changed();
-    });
+    WId win = KWindowSystem::activeWindow();
 
-    connect(&m_layout, &KbdLayout::layoutChanged, [this](int layId){
-        WId win = KWindowSystem::activeWindow();
+    if (m_active == win){
+        m_mapping[win] = group;
+        m_info.setCurrentGroup(group);
+    } else {
+        if (!m_mapping.contains(win))
+            m_mapping.insert(win, 0);
+        m_layout.lockGroup(m_mapping[win]);
+        m_active = win;
+        m_info.setCurrentGroup(m_mapping[win]);
+    }
+    emit changed();
+}
 
-        if (m_active == win){
-            m_mapping[win] = layId;
-            m_info.setCurrentGroup(layId);
-        } else {
-            if (!m_mapping.contains(win))
-                m_mapping.insert(win, 0);
-            m_layout.lockGroup(m_mapping[win]);
-            m_active = win;
-            m_info.setCurrentGroup(m_mapping[win]);
-        }
-        emit changed();
-    });
+void WinKbdKeeper::checkState()
+{
+    WId win = KWindowSystem::activeWindow();
 
-    connect(&m_layout, &KbdLayout::checkState, [this](){
-        WId win = KWindowSystem::activeWindow();
-
-        if( m_active != win) {
-            if (!m_mapping.contains(win))
-                m_mapping.insert(win, 0);
-            m_layout.lockGroup(m_mapping[win]);
-            m_active = win;
-            m_info.setCurrentGroup(m_mapping[win]);
-            emit changed();
-        }
-    });
-
-    return true;
+    if (!m_mapping.contains(win))
+        m_mapping.insert(win, 0);
+    m_layout.lockGroup(m_mapping[win]);
+    m_active = win;
+    m_info.setCurrentGroup(m_mapping[win]);
+    emit changed();
 }
 
 void WinKbdKeeper::switchToGroup(uint group)
@@ -118,48 +114,39 @@ AppKbdKeeper::AppKbdKeeper(const KbdLayout & layout):
 AppKbdKeeper::~AppKbdKeeper()
 {}
 
-bool AppKbdKeeper::setup()
+void AppKbdKeeper::layoutChanged(uint group)
 {
-    connect(&m_layout, &KbdLayout::keyboardChanged, [this](){
-        m_layout.readKbdInfo(m_info);
-        emit changed();
-    });
+    KWindowInfo info = KWindowInfo(KWindowSystem::activeWindow(), 0, NET::WM2WindowClass);
+    QString app = info.windowClassName();
 
-    connect(&m_layout, &KbdLayout::layoutChanged, [this](int layId){
-        KWindowInfo info = KWindowInfo(KWindowSystem::activeWindow(), 0, NET::WM2WindowClass);
-        QString app = info.windowClassName();
+    if (m_active == app){
+        m_mapping[app] = group;
+        m_info.setCurrentGroup(group);
+    } else {
+        if (!m_mapping.contains(app))
+            m_mapping.insert(app, 0);
 
-        if (m_active == app){
-            m_mapping[app] = layId;
-            m_info.setCurrentGroup(layId);
-        } else {
-            if (!m_mapping.contains(app))
-                m_mapping.insert(app, 0);
-
-            m_layout.lockGroup(m_mapping[app]);
-            m_active = app;
-            m_info.setCurrentGroup(m_mapping[app]);
-        }
-        emit changed();
-    });
-
-    connect(&m_layout, &KbdLayout::checkState, [this](){
-        KWindowInfo info = KWindowInfo(KWindowSystem::activeWindow(), 0, NET::WM2WindowClass);
-        QString app = info.windowClassName();
-
-        if( m_active != app) {
-            if (!m_mapping.contains(app))
-                m_mapping.insert(app, 0);
-
-            m_layout.lockGroup(m_mapping[app]);
-            m_active = app;
-            m_info.setCurrentGroup(m_mapping[app]);
-            emit changed();
-        }
-    });
-
-    return true;
+        m_layout.lockGroup(m_mapping[app]);
+        m_active = app;
+        m_info.setCurrentGroup(m_mapping[app]);
+    }
+    emit changed();
 }
+
+void AppKbdKeeper::checkState()
+{
+    KWindowInfo info = KWindowInfo(KWindowSystem::activeWindow(), 0, NET::WM2WindowClass);
+    QString app = info.windowClassName();
+
+    if (!m_mapping.contains(app))
+        m_mapping.insert(app, 0);
+
+    m_layout.lockGroup(m_mapping[app]);
+    m_active = app;
+    m_info.setCurrentGroup(m_mapping[app]);
+    emit changed();
+}
+
 
 void AppKbdKeeper::switchToGroup(uint group)
 {

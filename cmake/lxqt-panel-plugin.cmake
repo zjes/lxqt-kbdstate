@@ -78,6 +78,29 @@ macro(add_plugin TARGET)
 endmacro()
 
 macro(install_plugin TARGET)
+    install(
+        TARGETS     ${TARGET}
+        DESTINATION ${PLUGIN_DIR}
+    )
+
+    if(EXISTS "${CMAKE_SOURCE_DIR}/${TARGET}.desktop.in")
+        configure_file("${CMAKE_SOURCE_DIR}/${TARGET}.desktop.in" "${CMAKE_BINARY_DIR}/${TARGET}.desktop" @ONLY)
+        install(
+            FILES       "${CMAKE_BINARY_DIR}/${TARGET}.desktop"
+            DESTINATION "${LXQT_SHARE_DIR}/lxqt-panel"
+        )
+    endif()
+
+    if(EXISTS "${CMAKE_SOURCE_DIR}/translation")
+        message(${LXQT_TRANSLATIONS_DIR})
+    endif()
+
+    if(EXISTS "${CMAKE_SOURCE_DIR}/themes/")
+        install(
+            DIRECTORY   "${CMAKE_SOURCE_DIR}/themes/"
+            DESTINATION "${LXQT_SHARE_DIR}/themes/"
+        )
+    endif()
 endmacro()
 
 macro(lxqt_set_linker_flags FLAGS)

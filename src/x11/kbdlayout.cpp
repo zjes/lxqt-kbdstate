@@ -1,10 +1,10 @@
 #include <QCoreApplication>
 #include <QAbstractNativeEventFilter>
 #include <QDebug>
-#include <QLabel>
 #include <QFile>
 #include <QDomDocument>
 #include "kbdlayout.h"
+
 #include <xkbcommon/xkbcommon-x11.h>
 #include <xcb/xcb.h>
 #define explicit _explicit

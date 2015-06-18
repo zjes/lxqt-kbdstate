@@ -29,6 +29,8 @@ signals:
 private:
     void createKeeper(KeeperType type);
     void modifierLocked(Qt::Key key, bool active);
+private slots:
+    void keeperChanged();
 
 private:
     KModifierKeyInfo         *m_modifierInfo;

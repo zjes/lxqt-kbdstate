@@ -28,6 +28,10 @@ public:
 
     void switchToNext();
     virtual void switchToGroup(uint group);
+protected slots:
+    virtual void keyboardChanged();
+    virtual void layoutChanged(uint group);
+    virtual void checkState();
 signals:
     void changed();
 protected:
@@ -44,8 +48,10 @@ class WinKbdKeeper: public KbdKeeper
 public:
     WinKbdKeeper(const KbdLayout & layout);
     virtual ~WinKbdKeeper();
-    virtual bool setup();
     virtual void switchToGroup(uint group);
+protected slots:
+    virtual void layoutChanged(uint group);
+    virtual void checkState();
 private:
     QHash<WId, int> m_mapping;
     WId             m_active;
@@ -59,8 +65,10 @@ class AppKbdKeeper: public KbdKeeper
 public:
     AppKbdKeeper(const KbdLayout & layout);
     virtual ~AppKbdKeeper();
-    virtual bool setup();
     virtual void switchToGroup(uint group);
+protected slots:
+    virtual void layoutChanged(uint group);
+    virtual void checkState();
 private:
     QHash<QString, int> m_mapping;
     QString             m_active;

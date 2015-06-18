@@ -4,6 +4,7 @@
 #include "kbdstate.h"
 #include "kbdkeeper.h"
 #include "kbdstateconfig.h"
+//#include <LXQt/lxqtsettings.h>
 
 KbdState::KbdState(const ILxQtPanelPluginStartupInfo &startupInfo):
     QObject(),
@@ -13,6 +14,8 @@ KbdState::KbdState(const ILxQtPanelPluginStartupInfo &startupInfo):
     Settings::instance().init(settings());
     connect(&m_content, &Content::controlClicked, &m_watcher, &KbdWatcher::controlClicked);
     settingsChanged();
+    //const LxQt::LxQtTheme & theme = LxQt::LxQtTheme::currentTheme();
+    //qDebug() << theme.path();
 }
 
 KbdState::~KbdState()
