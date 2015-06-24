@@ -6,7 +6,6 @@
 #include "kbdkeeper.h"
 
 class KbdKeeper;
-class KModifierKeyInfo;
 
 class KbdWatcher: public QObject
 {
@@ -28,12 +27,10 @@ signals:
 
 private:
     void createKeeper(KeeperType type);
-    void modifierLocked(Qt::Key key, bool active);
 private slots:
     void keeperChanged();
 
 private:
-    KModifierKeyInfo         *m_modifierInfo;
     KbdLayout                 m_layout;
     QScopedPointer<KbdKeeper> m_keeper;
 };

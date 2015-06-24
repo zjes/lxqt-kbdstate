@@ -1,7 +1,6 @@
 include(GNUInstallDirs)
 
 find_package(Qt5 COMPONENTS Core Widgets)
-find_package(KF5GuiAddons REQUIRED)
 find_package(PkgConfig    REQUIRED QUIET)
 find_package(lxqt         REQUIRED)
 

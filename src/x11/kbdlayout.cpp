@@ -10,6 +10,7 @@
 #define explicit _explicit
 #include <xcb/xkb.h>
 #include "../kbdinfo.h"
+#include "../controls.h"
 
 namespace pimpl {
 
@@ -66,7 +67,29 @@ public:
             xcb_xkb_state_notify_event_t *sevent = reinterpret_cast<xcb_xkb_state_notify_event_t*>(event);
             switch(sevent->xkbType){
             case XCB_XKB_STATE_NOTIFY:
-                emit m_pub->layoutChanged(sevent->group);
+                xkb_state_update_mask(m_state,
+                    sevent->baseMods,
+                    sevent->latchedMods,
+                    sevent->lockedMods,
+                    sevent->baseGroup,
+                    sevent->latchedGroup,
+                    sevent->lockedGroup
+                );
+
+                if(sevent->changed & XCB_XKB_STATE_PART_GROUP_STATE){
+                    emit m_pub->layoutChanged(sevent->group);
+                }
+
+                if(sevent->changed & XCB_XKB_STATE_PART_MODIFIER_LOCK){
+                    for(Controls cnt: m_modifiers.keys()){
+                        bool oldState = m_modifiers[cnt];
+                        bool newState = xkb_state_led_name_is_active(m_state, modName(cnt));
+                        if(oldState != newState){
+                            m_modifiers[cnt] = newState;
+                            emit m_pub->modifierChanged(cnt, newState);
+                        }
+                    }
+                }
                 break;
             case XCB_XKB_NEW_KEYBOARD_NOTIFY:
                 readState();
@@ -99,7 +122,64 @@ public:
         }
     }
 
+    void lockModifier(Controls cnt, bool locked)
+    {
+        quint8 mask = fetchMask(cnt);
+        quint8 curMask = locked ? mask : 0;
+        xcb_void_cookie_t cookie = xcb_xkb_latch_lock_state(m_connection, m_deviceId, mask, curMask, 0, 0, 0, 0, 0);
+        xcb_generic_error_t *error = xcb_request_check(m_connection, cookie);
+        if (error){
+            qWarning() << "Lock group error: " << error->error_code;
+        }
+    }
+
+    bool isModifierLocked(Controls cnt) const
+    { return m_modifiers[cnt]; }
+
 private:
+    quint8 fetchMask(Controls cnt) const
+    {
+        static QHash<Controls, quint8> masks;
+        if (masks.contains(cnt))
+            return masks[cnt];
+
+        xkb_mod_index_t index =  xkb_keymap_led_get_index(m_keymap, modName(cnt));
+
+        xcb_generic_error_t *error = 0;
+        quint8 mask = 0;
+
+        xcb_xkb_get_indicator_map_cookie_t cookie = xcb_xkb_get_indicator_map(m_connection, m_deviceId, 1 << index);
+        xcb_xkb_get_indicator_map_reply_t *reply = xcb_xkb_get_indicator_map_reply(m_connection, cookie, &error);
+
+
+        if (!reply || error){
+            qWarning() << "Cannot fetch mask " << error->error_code;
+            return mask;
+        }
+
+        xcb_xkb_indicator_map_t *map = xcb_xkb_get_indicator_map_maps(reply);
+
+        mask = map->mods;
+        masks[cnt] = mask;
+
+        free(reply);
+        return mask;
+    }
+
+    const char * modName(Controls cnt) const
+    {
+        switch(cnt){
+        case Controls::Caps:
+            return XKB_LED_NAME_CAPS;
+        case Controls::Num:
+            return XKB_LED_NAME_NUM;
+        case Controls::Scroll:
+            return XKB_LED_NAME_SCROLL;
+        default:
+            return 0;
+        }
+    }
+
     void readState()
     {
         if (m_keymap)
@@ -109,6 +189,10 @@ private:
         if (m_state)
             xkb_state_unref(m_state);
         m_state = xkb_x11_state_new_from_device(m_keymap, m_connection, m_deviceId);
+
+        for(Controls cnt: m_modifiers.keys()){
+            m_modifiers[cnt] = xkb_state_led_name_is_active(m_state, modName(cnt));
+        }
         emit m_pub->keyboardChanged();
     }
 
@@ -141,13 +225,18 @@ private:
     }
 
 private:
-    struct xkb_context *m_context    = 0;
-    xcb_connection_t   *m_connection = 0;
-    int32_t             m_deviceId;
-    uint8_t             m_eventType;
-    xkb_state          *m_state      = 0;
-    xkb_keymap         *m_keymap     = 0;
-    ::X11Kbd           *m_pub;
+    struct xkb_context    *m_context    = 0;
+    xcb_connection_t      *m_connection = 0;
+    int32_t                m_deviceId;
+    uint8_t                m_eventType;
+    xkb_state             *m_state      = 0;
+    xkb_keymap            *m_keymap     = 0;
+    ::X11Kbd              *m_pub;
+    QHash<Controls, bool>  m_modifiers  = {
+        {Controls::Caps,   false},
+        {Controls::Num,    false},
+        {Controls::Scroll, false},
+    };
 };
 
 }
@@ -169,6 +258,10 @@ void X11Kbd::readKbdInfo(KbdInfo & info) const
 { m_priv->readKbdInfo(info); }
 
 void X11Kbd::lockGroup(uint layId) const
-{
-    m_priv->lockGroup(layId);
-}
+{ m_priv->lockGroup(layId); }
+
+void X11Kbd::lockModifier(Controls cnt, bool locked)
+{ m_priv->lockModifier(cnt, locked); }
+
+bool X11Kbd::isModifierLocked(Controls cnt) const
+{ return m_priv->isModifierLocked(cnt); }

@@ -54,7 +54,6 @@ add_plugin(${PROJECT_NAME}
         ${ADDLIBS}
         ${LXQT_LIBRARIES}
         Qt5::Widgets
-        KF5::GuiAddons
         KF5::WindowSystem
 )
 

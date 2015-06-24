@@ -1,19 +1,17 @@
 #include <QDebug>
-#include <KF5/KGuiAddons/KModifierKeyInfo>
 #include "kbdwatcher.h"
 
 KbdWatcher::KbdWatcher()
 {
-    m_modifierInfo = new KModifierKeyInfo(this);
-    connect(m_modifierInfo, &KModifierKeyInfo::keyLocked, this, &KbdWatcher::modifierLocked);
+    connect(&m_layout, SIGNAL(modifierChanged(Controls,bool)), SIGNAL(modifierStateChanged(Controls,bool)));
     m_layout.init();
 }
 
 void KbdWatcher::setup()
 {
-    emit modifierStateChanged(Controls::Caps,   m_modifierInfo->isKeyLocked(Qt::Key_CapsLock));
-    emit modifierStateChanged(Controls::Num,    m_modifierInfo->isKeyLocked(Qt::Key_NumLock));
-    emit modifierStateChanged(Controls::Scroll, m_modifierInfo->isKeyLocked(Qt::Key_ScrollLock));
+    emit modifierStateChanged(Controls::Caps,   m_layout.isModifierLocked(Controls::Caps));
+    emit modifierStateChanged(Controls::Num,    m_layout.isModifierLocked(Controls::Num));
+    emit modifierStateChanged(Controls::Scroll, m_layout.isModifierLocked(Controls::Scroll));
 
     if (!m_keeper || m_keeper->type() != Settings::instance().keeperType()){
         createKeeper(Settings::instance().keeperType());
@@ -45,37 +43,15 @@ void KbdWatcher::keeperChanged()
     emit layoutChanged(m_keeper->sym(), m_keeper->name());
 }
 
-void KbdWatcher::modifierLocked(Qt::Key key, bool active)
-{
-    switch (key) {
-    case Qt::Key_CapsLock:
-        emit modifierStateChanged(Controls::Caps, active);
-        break;
-    case Qt::Key_NumLock:
-        emit modifierStateChanged(Controls::Num, active);
-        break;
-    case Qt::Key_ScrollLock:
-        emit modifierStateChanged(Controls::Scroll, active);
-        break;
-    default:
-        break;
-    }
-}
-
 void KbdWatcher::controlClicked(Controls cnt)
 {
     switch(cnt){
-    case Controls::Caps:
-        m_modifierInfo->setKeyLocked(Qt::Key_CapsLock, !m_modifierInfo->isKeyLocked(Qt::Key_CapsLock));
-        break;
-    case Controls::Num:
-        m_modifierInfo->setKeyLocked(Qt::Key_NumLock, !m_modifierInfo->isKeyLocked(Qt::Key_NumLock));
-        break;
-    case Controls::Scroll:
-        m_modifierInfo->setKeyLocked(Qt::Key_ScrollLock, !m_modifierInfo->isKeyLocked(Qt::Key_ScrollLock));
-        break;
     case Controls::Layout:
         m_keeper->switchToNext();
         break;
+    default:
+        m_layout.lockModifier(cnt, !m_layout.isModifierLocked(cnt));
+        break;
     }
+
 }
