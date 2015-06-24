@@ -79,5 +79,5 @@ void KbdStateConfig::save()
 
 void KbdStateConfig::configureLayouts()
 {
-    QProcess::execute("lxqt-config-input");
+    QProcess::startDetached(QStringLiteral("lxqt-config-input"));
 }
