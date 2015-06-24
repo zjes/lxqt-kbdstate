@@ -215,6 +215,14 @@ private:
                                 conf.firstChildElement("description").firstChild().toText().data(),
                                 conf.firstChildElement("name").firstChild().toText().data()
                             );
+                            auto variants = layout.childNodes().at(i).firstChildElement("variantList");
+                            for(int j = 0; j < variants.childNodes().count(); ++j){
+                                auto var = variants.childNodes().at(j).firstChildElement("configItem");
+                                names.insert(
+                                    var.firstChildElement("description").firstChild().toText().data(),
+                                    conf.firstChildElement("name").firstChild().toText().data()
+                                );
+                            }
                         }
                     }
                     file.close();
