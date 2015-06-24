@@ -14,6 +14,13 @@
 
 namespace pimpl {
 
+struct LangInfo
+{
+    QString name;
+    QString syn;
+    QString variant;
+};
+
 class X11Kbd: public QAbstractNativeEventFilter
 {
 public:
@@ -107,7 +114,8 @@ public:
         xkb_layout_index_t count = xkb_keymap_num_layouts(m_keymap);
         for(xkb_layout_index_t i = 0; i < count; ++i){
             QString name = xkb_keymap_layout_get_name(m_keymap, i);
-            info.append({names()[name], name});
+            const LangInfo & linfo = names(name);
+            info.append({linfo.syn, linfo.name, linfo.variant});
             if (xkb_state_layout_index_is_active(m_state, i, XKB_STATE_LAYOUT_EFFECTIVE))
                 info.setCurrentGroup(i);
         }
@@ -196,9 +204,10 @@ private:
         emit m_pub->keyboardChanged();
     }
 
-    const QHash<QString, QString> & names() const
+    const LangInfo & names(const QString & langName) const
     {
-        static QHash<QString, QString> names;
+        static LangInfo def{"Unknown", "??", "None"};
+        static QHash<QString, LangInfo> names;
         if (names.empty()){
             if(QFile::exists("/usr/share/X11/xkb/rules/evdev.xml")){
                 QDomDocument doc;
@@ -212,15 +221,21 @@ private:
                         for(int i = 0; i < layout.childNodes().count(); ++i){
                             auto conf = layout.childNodes().at(i).firstChildElement("configItem");
                             names.insert(
-                                conf.firstChildElement("description").firstChild().toText().data(),
-                                conf.firstChildElement("name").firstChild().toText().data()
+                                conf.firstChildElement("description").firstChild().toText().data(),{
+                                    conf.firstChildElement("description").firstChild().toText().data(),
+                                    conf.firstChildElement("name").firstChild().toText().data(),
+                                    "None"
+                                }
                             );
                             auto variants = layout.childNodes().at(i).firstChildElement("variantList");
                             for(int j = 0; j < variants.childNodes().count(); ++j){
                                 auto var = variants.childNodes().at(j).firstChildElement("configItem");
                                 names.insert(
-                                    var.firstChildElement("description").firstChild().toText().data(),
-                                    conf.firstChildElement("name").firstChild().toText().data()
+                                    var.firstChildElement("description").firstChild().toText().data(), {
+                                        conf.firstChildElement("description").firstChild().toText().data(),
+                                        conf.firstChildElement("name").firstChild().toText().data(),
+                                        var.firstChildElement("name").firstChild().toText().data()
+                                    }
                                 );
                             }
                         }
@@ -229,7 +244,9 @@ private:
                 }
             }
         }
-        return names;
+        if (names.contains(langName))
+            return names[langName];
+        return def;
     }
 
 private:

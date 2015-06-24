@@ -20,7 +20,7 @@ public:
 
     virtual bool eventFilter(QObject *object, QEvent *event);
 public slots:
-    void layoutChanged(const QString & sym, const QString & name);
+    void layoutChanged(const QString & sym, const QString & name, const QString & variant);
     void modifierStateChanged(Controls mod, bool active);
 signals:
     void controlClicked(Controls cnt);

@@ -23,6 +23,9 @@ public:
     const QString & name() const
     { return m_info.currentName(); }
 
+    const QString & variant() const
+    { return m_info.currentVariant(); }
+
     KeeperType type() const
     { return m_type; }
 

@@ -51,10 +51,14 @@ bool Content::setup()
     return true;
 }
 
-void Content::layoutChanged(const QString & sym, const QString & name)
+void Content::layoutChanged(const QString & sym, const QString & name, const QString & variant)
 {
     m_layout->setText(sym.toUpper());
-    m_layout->setToolTip(name);
+    QString txt = QString("<html><table>\
+    <tr><td>%1: </td><td>%3</td></tr>\
+    <tr><td>%2: </td><td>%4</td></tr>\
+    </table></html>").arg(tr("Layout")).arg(tr("Variant")).arg(name).arg(variant);
+    m_layout->setToolTip(txt);
 }
 
 void Content::modifierStateChanged(Controls mod, bool active)

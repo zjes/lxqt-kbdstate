@@ -40,7 +40,7 @@ void KbdWatcher::createKeeper(KeeperType type)
 
 void KbdWatcher::keeperChanged()
 {
-    emit layoutChanged(m_keeper->sym(), m_keeper->name());
+    emit layoutChanged(m_keeper->sym(), m_keeper->name(), m_keeper->variant());
 }
 
 void KbdWatcher::controlClicked(Controls cnt)

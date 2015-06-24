@@ -14,6 +14,7 @@ public:
     {
         QString sym;
         QString name;
+        QString variant;
     };
 
 public:
@@ -22,6 +23,9 @@ public:
 
     const QString & currentName() const
     { return m_keyboardInfo[m_current].name; }
+
+    const QString & currentVariant() const
+    { return m_keyboardInfo[m_current].variant; }
 
     int currentGroup() const
     { return m_current; }

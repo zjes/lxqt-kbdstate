@@ -22,7 +22,7 @@ public:
 public slots:
     void controlClicked(Controls cnt);
 signals:
-    void layoutChanged(const QString & sym, const QString & name);
+    void layoutChanged(const QString & sym, const QString & name, const QString & variant);
     void modifierStateChanged(Controls mod, bool active);
 
 private:
