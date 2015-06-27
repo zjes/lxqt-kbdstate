@@ -46,9 +46,6 @@
    </item>
    <item>
     <widget class="QGroupBox" name="switchMode">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
      <property name="title">
       <string/>
      </property>
@@ -70,6 +67,9 @@
         </item>
         <item>
          <widget class="QCheckBox" name="showLayout">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="text">
            <string>Show keyboard layout</string>
           </property>
@@ -109,6 +109,9 @@
       </item>
       <item>
        <widget class="QRadioButton" name="switchGlobal">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>Global</string>
         </property>
@@ -119,6 +122,9 @@
       </item>
       <item>
        <widget class="QRadioButton" name="switchWindow">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>Window</string>
         </property>
@@ -129,6 +135,9 @@
       </item>
       <item>
        <widget class="QRadioButton" name="switchApplication">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>Application</string>
         </property>
@@ -139,9 +148,6 @@
       </item>
       <item>
        <widget class="QPushButton" name="configureLayouts">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
         <property name="text">
          <string>Configure layouts</string>
         </property>

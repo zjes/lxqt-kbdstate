@@ -23,9 +23,10 @@ KbdStateConfig::KbdStateConfig(QWidget *parent) :
     );
 
     connect(m_ui->showLayout, &QCheckBox::stateChanged, [this](int checked){
-        m_ui->switchMode->setEnabled(checked);
         //m_ui->showFlags->setEnabled(checked); //TODO: Country flags support
-        m_ui->configureLayouts->setEnabled(checked);
+        m_ui->switchGlobal->setEnabled(checked);
+        m_ui->switchWindow->setEnabled(checked);
+        m_ui->switchApplication->setEnabled(checked);
     });
 
     connect(m_ui->configureLayouts, &QPushButton::clicked, this, &KbdStateConfig::configureLayouts);
