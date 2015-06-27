@@ -36,6 +36,7 @@ void KbdWatcher::createKeeper(KeeperType type)
     connect(m_keeper.data(), SIGNAL(changed()), this, SLOT(keeperChanged()));
 
     m_keeper->setup();
+    keeperChanged();
 }
 
 void KbdWatcher::keeperChanged()
